@@ -1,0 +1,1 @@
+print(input("SHOUT: ").upper())
