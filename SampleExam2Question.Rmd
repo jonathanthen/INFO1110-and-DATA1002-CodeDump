@@ -1,0 +1,259 @@
+---
+title: "MATH1115 Computer Practical Exam (SAMPLE EXAM No.2 + ANSWERS)"
+subtitle: "Semester 1 2019"
+date: 
+output:
+  html_document:
+    number_sections: yes
+    self_contained: yes
+    theme: paper 
+    toc: true  # Table of contents
+    toc_depth: 3
+    toc_float: true
+---
+
+<style>
+h2 { /* Header 2 */
+    font-size: 22px
+}
+</style>
+
+*Note: below is a sample exam.*
+
+It is based on the  `flights` dataset, which is provided by the `nycflights13` package. It contains information about all flights originated from three New York airports in 2013. Each row of the data represents a flight originated from one of three New York airports. 
+
+Below is given some suggested code in the code blocks. In your exam, the code blocks will be mostly blank, with some occasional hints provided.
+
+## MY SID IS: XXXXX {-}
+
+<br>
+
+# Initial Data Analysis
+
+Load packages and data
+
+```{r, warning=F, message=F}
+library(tidyverse)
+library(nycflights13)
+
+data("flights", package = "nycflights13")
+```
+
+
+## Question 1. Subsetting data 1
+
+The `flights` data is the data that we will be using for this exam. So it is important for us to know what these columns represent: 
+
+  1. `dep_delay`, the departure delay for each flight, in minutes
+  1. `arr_delay`, the arrival delay for each flight, in minutes
+  1. `carrier`, the airline carrier of each flight. Due to Question 1, we only have `AA` and `VX` in this column. 
+  1. `origin`, the origin of each flight. Since only New York flights were considered, this column only contains value `JFK`, `LGA`, `EWR`. 
+  1. `dest`, the destination of each flight. It only has a three-letters airport abbreviation for each flight. 
+  1. There are other columns in this data, but we will throw them away in Question 2
+
+
++ Explain what does this code do on the `flights` data? 
+
+**Hint**: the code `AA` stands for "American Airline" and `VX` stands for "Virgin American Airline". 
+
+
+```{r}
+selected_flights = flights %>% 
+  filter(carrier %in% c("AA", "VX"))
+selected_flights2 = filter(flights, carrier == "VX" | carrier == "AA")
+
+# Filters out those carriers that are AA or VX
+```
+
+
+
+## Question 2: Subsetting data 2
+
+Subset `selected_flights` to only have the columns `dep_delay`, `arr_delay`, `carrier`, `origin` and `dest`. Save this new data as an object called `small_flights`. 
+
+```{r}
+small_flights <- selected_flights %>%
+  select(dep_delay, arr_delay, carrier, origin, dest) 
+
+small_flights <- selected_flights[, c("dep_delay", "arr_delay", "carrier", "origin", "dest")]
+
+```
+
+## Question 3: Initial Data Analysis
+
+Conduct an initial data analysis on `small_flights` to determine the structure of your data. Write a concise summary.
+
+```{r}
+str(small_flights)
+
+```
+
+The data set contains 37,891 entries, with 5 variables, representing various information about each flight in and out of the three New York airports.
+
+## Question 4: Three airports in New York City
+
+There are three airports in the city of New York. These are coded as the `origin` variable. 
+
+  + `JKF` (John F. Kennedy International Airport)
+  + `LGA` (LaGuardia Airport)
+  + `EWR` (Newark Liberty International Airport) 
+  
+  In R, calculate the number of flights from each of these airports by **each** of these `carrier`. (i.e. construct a 3-by-2 `table` or a summary `data.frame`). Which one of the three airports does Virgin America Airline NOT operating from?
+  
+  
+
+```{r}
+table(small_flights$origin, small_flights$carrier)
+
+```
+
+Virgin American Airline does not operate from LaGuardia Airport
+
+## Question 5: Data filtering 
+
+What are the values of the 5 most heaviest arrival delays in this data?
+
+Which airline carrier operated all these 5 flights?
+
+(Hint: positive value of `arr_delay` indicates delays in minutes.)
+
+
+
+```{r}
+small_flights %>%
+  arrange(desc(arr_delay))
+
+```
+
+
+
+
+
+## Question 6: Arrival delays 1
+
++ Provide one appropriate visualisation of the variable `arr_delay` using `ggplot2`.
+
++ Describe the pattern of arrival delay. 
+
+
+```{r}
+small_flights %>% ggplot(., aes(y = arr_delay)) + geom_boxplot()
+
+```
+
+
+
+## Question 7: Arrival delay 2
+
++ Would a normal model be appropriate to model arrival delay (`arr_delay`)?  
+
++ Are there more late arrivals (positive value of `arr_delay`) or early arrival (negative value of `arr_delay`)?
+
+Note: You must use at least one appropriate graphical (`ggplot2` is not necessary) or numerical tool. 
+
+
+```{r}
+#Use QQ PLOT and QQ LINE
+
+table(sign(small_flights$arr_delay))
+
+```
+
+
+
+
+# Simple Linear Regression
+
+
+
+## Question 8: Linear regression between `arr_delay` and `dep_delay` 1. 
+
++ Plot `arr_delay` (y) against `dep_delay` (x) in a scatter plot (`ggplot2` is not necessary). 
+
++ Provide two general comments for this scatter plot. 
+
+```{r}
+# Add your code below
+
+```
+
+
+
+## Question 9: Linear regression between `arr_delay` and `dep_delay` 2. 
+
+  + Compute a linear regression model for `arr_delay` (y) against `dep_delay` (x). State clearly what are the intercept term and slope term for this linear regression model. 
+
+  + Show the linear regression model on your scatter plot as a coloured line (`ggplot2` is not necessary).
+
+```{r}
+#Regress THIS against THIS = (y) against (x)
+
+```
+
+
+## Question 10: Linear regression between `arr_delay` and `dep_delay` 3. 
+
++ Suppose there are two flights, A and B, departing from an unknown New York airports. During departure, flight A was delayed by 5 minutes and flight B was delayed by 30 minutes. Based on the model we have computed in Question 9, compute the predicted difference in the arrival delay times for these two flights (2 decimal places). 
+
+
+```{r}
+# Add your code below
+
+```
+
+
+<br>
+
+## Question 11: Chi-square test 1
+
+It is postulated that the carriers (`AA` and `VX`) are independent to the origin airports. Test this hypothesis using a chi-square test.
+
+```{r}
+# Put your code here
+
+```
+
+
+## Question 11: Chi-square test 2
+
+It is postulated that AA spreads its flights over three airports in ratios of 10:40:45. Design a Chi-square test for this. Note: use the outputs from Question 10. 
+
+```{r}
+# Put your code here
+
+```
+
+
+
+<br>
+
+
+# Binomual modelling
+
+## Question 12: Binomial modelling
+
+
+Suppose we restrict our attention to the JFK airport and only the AA and VX flights. Also, suppose the probablility of selecting a flight that is AA is 0.9 and the probability of selecting a flight that is VX is 0.1.
+
+  + Construct a box model that represents this situation and draw a sample of size 100 from this box. You may assume AA is coded as "0" and VX is coded as "1". 
+  + Calculate the expected value and standard error of the total number of VX flights based on this sample of 100. 
+  
+  
+```{r}
+library(multicon)
+size = 100
+x = sample(c(0,1))
+
+#popsd is used instead of sd
+```
+  
+## Question 13: Binomial model 
+
+What is the probability that out of a random sample of 100 flights, that less than 15 flights are from the carrier VX? (Using a binomial model or an appropriate normal approximation)
+
+```{r}
+# find lower tail because it asks for less than 15 flights
+
+```
+  
+  

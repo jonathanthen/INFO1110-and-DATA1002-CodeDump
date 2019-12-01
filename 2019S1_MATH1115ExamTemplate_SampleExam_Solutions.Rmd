@@ -1,0 +1,207 @@
+---
+title: "MATH1115 Computer Practical Exam (SAMPLE EXAM + ANSWERS)"
+subtitle: "Semester 1 2019"
+date: 
+output:
+  html_document:
+    number_sections: yes
+    self_contained: yes
+    theme: flatly 
+    toc: true  # Table of contents
+    toc_depth: 3
+    toc_float: true
+---
+
+<style>
+h2 { /* Header 2 */
+    font-size: 22px
+}
+</style>
+
+*Note: below is a sample exam.*
+
+It is based on the  `msleep` dataset, which is provided with ggplot2. It contains information about sleep and awake times of different mammals. Below is given some suggested code in the code blocks. In your exam, the code blocks will be mostly blank, with some occasional hints provided.
+
+## MY SID IS: XXXXX {-}
+
+<br>
+
+## INITIAL DATA ANALYSIS
+
+Load packages and data
+```{r, warning=F, message=F}
+library(tidyverse)
+library(ggthemes)
+library(ggplot2)
+sleep = msleep  
+```
+
+**Question1**: Conduct an initial data analysis to determine the structure of your data.  Write a concise summary,
+
+```{r}
+# Add your code below
+
+help(msleep)
+str(sleep)
+```
+
+The data set contains 83 mammals, with 11 variables, representing the classification of mammal (name, genus, vore, order), conservation status, sleep patterns (total, rem, cycle, awake), and brain and body weight.
+
+**Question2**:  Across all the mammals, what is the average body weight? How does this compare to the median? Explain your findings.
+
+```{r}
+# Add your code
+
+mean(sleep$bodywt)
+median(sleep$bodywt)
+
+# Investigate further
+summary(sleep$bodywt)
+hist(sleep$bodywt)
+sleep$name[sleep$bodywt == max(sleep$bodywt)]
+boxplot(sleep$bodywt)
+```
+
+- The average body weight across all the mammals is 166.14 (presume unit is kg; 2 dp), compared to a tiny median of 1.67. 
+- A fuller summary shows a huge range of weights, so there are issues with robustness (hence using the mean would not be appropriate). The African elephant is the heaviest mammal, which is an outlier (along with other outliers).
+
+**Question3**:  Which mammal has the biggest brain weight? What is a limitation of this analysis? What is a research question arising from syntheising Q2 and Q3?
+
+```{r}
+# Add your code
+
+summary(sleep$brainwt)
+27/length(sleep$brainwt)
+
+max(sleep$brainwt, na.rm=T)
+sleep$name[sleep$brainwt == max(sleep$brainwt, na.rm=T)]
+```
+
+Note: 
+- The heaviest brain is 5.712 (kg?), which again is the African elephant.
+- A limitation is that there are 27 missing entries which is 35% of the data.
+- As the largest mammal has the largest brain weight, we coul propose that there is a relationship between body weight and brain weight
+
+**Question 4:**  Describe the pattern of total sleep in mammals? Would a Normal model be appropriate?
+
+```{r}
+# Add your code
+
+summary(sleep$sleep_total)
+hist(sleep$sleep_total)
+
+qqnorm(sleep$sleep_total, main='Normal Q-Q Plot for sleep_total')
+qqline(sleep$sleep_total)
+```
+
+- From this data, there isn a big variation in hours slept by the mammals. The average is around 10 hours, with minimum 2 hours and maximum 20 hours!
+- The Normal curve appears to fit well.
+
+**Question 4:**  Describe the pattern of REM sleep in mammals? Would a Normal model be appropriate?
+
+```{r}
+# Add your code
+
+summary(sleep$sleep_rem)
+hist(sleep$sleep_rem)
+sd(sleep$sleep_rem, na.rm=T)
+
+qqnorm(sleep$sleep_rem, main='Normal Q-Q Plot for sleep_total')
+qqline(sleep$sleep_rem, col = 'red')
+
+table(sign(sleep$sleep_rem))
+```
+
+- From this data, the amount of REM sleep is muhc more compact (compared to total sleep), with a right skewed distribution, with a mean around 2 and SD 1.
+- The Normal curve does not fit well.
+
+<br>
+
+## SIMPLE LINEAR REGRESSION
+
+**Research Question**: Is there a linear relationship between brain weight and body weight for mammals? Explain the extra code given for residual plot.
+
+```{r}
+# Add code here
+
+plot(sleep$bodywt, sleep$brainwt)
+#cor(sleep$bodywt, sleep$brainwt) # Note effect of missing values
+#cor(sleep$bodywt, sleep$brainwt, use = "complete.obs")  
+L = lm(sleep$brainwt ~ sleep$bodywt)
+summary(L)
+abline(L)
+
+# Code below given for residual plot
+length(sleep$bodywt) 
+length(L$residuals)
+
+residuals1 = resid(lm(L, na.action=na.exclude))
+length(residuals1)
+plot(sleep$bodywt,residuals1)
+```
+
+- Despite the correlation coefficient being high, the scatterplot does not seem to indicate a linear trend (as the outliers are very influential) as the t.test for the slope coefficient indicates (p-value is very small).
+- If we try to do a residual plot, we find a problem with missing vales, as there are 56 entries for residuals (based on 56 entries for brainwt) and 83 for bodywt. Hence, we need to add the missing values to the residuals. The resulting residual again indicates that the linear regression is not appropriate.
+
+<br>
+
+## CHI-SQUARED TEST
+
+**Research Question**: It is postulated that the proportions of carnivores, herbivores, insectivores and omivores is in the ratio 0.2 : 0.4 : 0.1 : 0.3. Test this claim.
+
+```{r}
+# Put your code here
+
+table(sleep$vore)
+barplot(table(sleep$vore), xlab='Feeding Type', ylab='Number of Species')
+chisq.test(table(sleep$vore), p = c(0.2, 0.4, 0.1, 0.3))
+```
+
+The model appears to be a good fit.
+
+<br>
+
+## BINOMIAL MODELLING
+
+Context: Assume a random sample of 30 mammals is collected. Modelling by a box model, find the expected number of herbivores. What is the chance of observing 15 or more mammals? 
+
+```{r}
+# Add Code Here
+library(multicon)  # allows us to used popsd()
+
+set.seed(1)
+box=c(1,0)
+box1 = sample(box, 30, prob = c(0.4, 0.6), rep = T)  # Here we use the poportion from hypothesis test above.
+table(box1)
+ev = 30 * mean(box1)
+se = sqrt(30)* popsd(box1)
+c(ev,se)
+
+# Binomial Model
+pbinom(15, 30, 0.4, lower.tail = F)
+```
+
+- Using this particular seed, the expected number of herbivores is 13 with SE of around 3.
+- The chance of observing 15 or more herbivores would be about 10%.
+
+<br>
+
+## DATA WRANGLING
+
+Annotate the code below, so that it explains what each line is doing.
+
+```{r, warning = F, message = F, eval = F}
+# code given
+
+ggplot(data=sleep, aes(x=bodywt, y=sleep_total, col = vore))+geom_point() # A scatter plot of total sleep vs body weight, coloured by the trophic (feeding) level.
+
+sleep %>%
+  count(order, sort = TRUE)  # counts the orders of the mammals, and then sorts from top to bottom.
+
+sleep %>%
+  group_by(vore) %>%
+  summarise(n = n(), average = mean(sleep_total)/24)
+# Calculates the average proportion of the day slept by each trophic (eating) level.
+```
+
+

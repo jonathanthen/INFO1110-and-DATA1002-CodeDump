@@ -1,0 +1,107 @@
+---
+title: "MATH1115 Computer Practical Exam (SAMPLE TEMPLATE)"
+subtitle: "Semester 1 2019"
+date: 
+output:
+  html_document:
+    number_sections: yes
+    self_contained: yes
+    theme: flatly 
+    toc: true  # Table of contents
+    toc_depth: 3
+    toc_float: true
+---
+
+<style>
+h2 { /* Header 2 */
+    font-size: 22px
+}
+</style>
+
+*Note: below is an empty template showing you the basic format of your exam. You will be given a template like this, populated with a url for the data, and research questions.*
+
+## MY SID IS: XXXXX {-}
+
+<br>
+
+## INITIAL DATA ANALYSIS
+
+Load packages and data
+```{r, warning=F, message=F}
+library(tidyverse)
+library(ggthemes)
+library(ggplot2)
+#file = read.csv(file = "url given")
+```
+
+**Question1**: 
+
+```{r}
+# Put your code here
+```
+
+<>
+
+**Question2**: 
+
+```{r}
+# Add code here
+```
+
+<>
+
+**Question3**: 
+
+```{r}
+# Add code here
+```
+
+<>
+
+<br>
+
+## SIMPLE LINEAR REGRESSION
+
+**Research Question**: 
+
+```{r}
+# Add code here
+```
+
+<>
+
+<br>
+
+## CHI-SQUARED TEST
+
+**Research Question**: 
+
+```{r}
+# Put your code here
+```
+
+<>
+
+<br>
+
+## BINOMIAL MODELLING
+
+Context:
+
+```{r}
+# Add Code Here
+```
+
+<>
+
+<br>
+
+## DATA WRANGLING
+
+Annotate the code below, so that it explains what each line is doing.
+
+```{r, warning = F, message = F, eval = F}
+# code given
+```
+
+

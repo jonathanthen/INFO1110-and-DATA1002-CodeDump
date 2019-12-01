@@ -1,0 +1,176 @@
+---
+title: "MATH1115 Computer Practical Exam (SAMPLE EXAM)"
+subtitle: "Semester 1 2019"
+date: 
+output:
+  html_document:
+    number_sections: yes
+    self_contained: yes
+    theme: flatly 
+    toc: true  # Table of contents
+    toc_depth: 3
+    toc_float: true
+---
+
+<style>
+h2 { /* Header 2 */
+    font-size: 22px
+}
+</style>
+
+*Note: below is a sample exam.*
+
+It is based on the  `msleep` dataset, which is provided with ggplot2. It contains information about sleep and awake times of different mammals. Below is given some suggested code in the code blocks. In your exam, the code blocks will be mostly blank, with some occasional hints provided.
+
+## MY SID IS: XXXXX {-}
+
+<br>
+
+## INITIAL DATA ANALYSIS
+
+Load packages and data
+```{r, warning=F, message=F}
+library(tidyverse)
+library(ggthemes)
+library(ggplot2)
+sleep = msleep  
+```
+
+**Question1**: Conduct an initial data analysis to determine the structure of your data.  Write a concise summary,
+
+```{r}
+help(msleep)
+```
+
+<>
+
+**Question2**:  Across all the mammals, what is the average body weight? How does this compare to the median? Explain your findings.
+
+```{r}
+mean(sleep$bodywt)
+median(sleep$bodywt)
+#The mean body weight is 166.1363kg while the median body weight is 1.67.
+# There are a few heavy animals such as the asian and african elephants which skew the mean. Most of the animals are on the lighter side.
+
+```
+
+<>
+
+**Question3**:  Which mammal has the biggest brain weight? What is a limitation of this analysis? What is a research question arising from syntheising Q2 and Q3?
+
+```{r}
+max(sleep$brainwt, na.rm = T)
+#The African Elehant has the biggest brain weight.
+#Does the overall weight affect the brain weight of an animal?
+```
+
+<>
+
+**Question 4:**  Describe the pattern of total sleep in mammals? Would a Normal model be appropriate?
+
+```{r}
+shapiro.test(sleep$sleep_total)
+#From the output, the p-value of 0.2143 is greater than 0.05 implying that the distribution of the data are not significantly different from normal distribution. In other words, we can assume the normality.
+```
+
+**Question 4:**  Describe the pattern of REM sleep in mammals? Would a Normal model be appropriate?
+
+```{r}
+shapiro.test(sleep$sleep_rem)
+#From the output, the p-value of 2.078e-05 is lesser than 0.05 implying that the distribution of the data is significantly different from normal distribution. In other words, a normal model is not appropriate.
+```
+
+<br>
+
+## SIMPLE LINEAR REGRESSION
+
+**Research Question**: Is there a linear relationship between brain weight and body weight for mammals? Explain the extra code given for residual plot.
+
+```{r, eval = F}
+plot(sleep$brainwt ~ sleep$bodywt)
+cor(sleep$bodywt, sleep$brainwt)
+L = lm(sleep$brainwt ~ sleep$bodywt)
+L$coeff
+abline(L)
+# Code below given for residual plot
+length(sleep$bodywt) 
+length(L$residuals)
+
+residuals1 = resid(lm(sleep$brainwt ~ sleep$bodywt, na.action=na.exclude)) 
+length(residuals1)
+plot(sleep$bodywt,residuals1)
+
+#No, there is no linear relationship between brain weight and body weight  for mammals. The residual plot helps to detect any pattern not captured by the linear model. If it is a random scatter, then the linear model seems appropriate. If it shows a pattern (eg quadratic), then another model should be considered.
+```
+
+<br>
+
+## CHI-SQUARED TEST
+
+**Research Question**: It is postulated that the proportions of carnivores, herbivores, insectivores and omivores is in the ratio 0.2 : 0.4 : 0.1 : 0.3. Test this claim.
+
+```{r}
+table(sleep$vore)
+observedfreq = c(19,32,5,20)
+exprectedprop = c(0.2, 0.4, 0.1, 0.3)
+chisq.test(x = observedfreq, p = exprectedprop)
+
+#Therefore we accept the null hypothesis that the claim of the proportion ratios of 0.2 : 0.4 : 0.1 : 0.3 is correct.
+```
+
+<br>
+
+## BINOMIAL MODELLING
+
+Context: Assume a random sample of 30 mammals is collected. Modelling by a box model, find the expected number of herbivores. What is the chance of observing 15 or more mammals?
+```{r}
+box = c(0, 1)
+n = 30
+1 - pbinom(15, 30, 0.4)
+```
+
+```{r}
+library(DiagrammeR)
+grViz(" 
+  digraph CFA {
+
+  # All
+  node [fontname = Helvetica, fontcolor = White]
+
+    # Box
+    node [shape = box, style=filled, color=SteelBlue4, width=2 label='0  1'][fillcolor = SteelBlue4]
+    a ; 
+
+    # Sample
+    node [shape = circle, style=filled, color=IndianRed, width=0.5, label='-'][fillcolor = IndianRed]
+    b ; 
+
+    # Draws
+    a -> b [fontname = Helvetica,label = '10 draws',fontsize=8]
+    b -> a  [fontname = Helvetica,color=grey,arrowsize = 0.5]
+  }
+
+")
+
+```
+
+<br>
+
+## DATA WRANGLING
+
+Annotate the code below, so that it explains what each line is doing.
+
+```{r, warning = F, message = F, eval = F}
+# code given
+# describe data wrangling and explain the functions
+
+ggplot(data=sleep, aes(x=bodywt, y=sleep_total, col = vore))+geom_point() 
+sleep %>%
+  count(order, sort = TRUE)  
+
+sleep %>%
+  group_by(vore) %>%
+  summarise(n = n(), average = mean(sleep_total)/24)
+```
+
+
